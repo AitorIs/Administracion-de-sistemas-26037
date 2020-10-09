@@ -1,0 +1,49 @@
+version: "3"
+  
+services:
+  dns: 
+    image: sameersbn/bind:9.16.1-20200524
+    container_name: dns_service
+    volumes:
+      - ./dns:/data
+    ports:
+      - 53:53
+      - 10000:10000
+    networks:
+      red_prueba:
+        ipv4_address: 192.168.0.2
+    dns:
+      - 127.0.0.1
+      - 8.8.8.8
+    
+  web:
+    image: php:7-apache
+    container_name: apache_1
+    volumes:
+      - ./web/:/var/www/html
+    expose:
+      - 80
+    ports:
+      - 80:80
+    networks:
+      red_prueba:
+        ipv4_address: 192.168.0.3
+  mail:
+    image: tvial/docker-mailserver:latest
+    container_name: mail_1
+    ports:
+      - "25:25"
+    volumes:
+      - ./var/mail
+      - ./var/mail-state
+      - ./var/log/mail
+      - ./config/:/tmp/docker-mailserver/
+    networks:
+      red_prueba:
+        ipv4_address: 192.168.0.4       
+networks:
+  red_prueba:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 192.168.0.0/24
