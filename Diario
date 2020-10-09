@@ -5,4 +5,8 @@ Me pase 10 horas, haciendo el documento de la actividad 2 y trasteando con los s
 
 06/10/2020
 
-Me he dedicado a crear un archivo para docker-compose para desplegar
+Me he dedicado a crear un archivo para docker-compose para desplegar un servidor apache, DNS y mail.
+He configurado el servidor DNS.
+Me he comprado un dominio gratuito .tk para probar enlazando el dominio mediante el servidor DNS configurado.
+
+09/10/2020
