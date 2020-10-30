@@ -1,0 +1,25 @@
+
+[backends]
+  [backends.whoamiF]
+  [backends.whoamiF.maxconn]
+    amount = 4
+    extractorfunc="client.ip"
+  [backends.whoamiF.circuitbreaker]
+    expression = "NetworkErrorRatio() > 0.5" 
+  [backends.whoamiF.servers.server1]
+    url = "http://172.18.0.3:80"
+    weight = 5
+  [backends.whoamiF.servers.server2]
+    url = "http://172.18.0.4:80"
+    weight = 2
+  [backends.whoamiF.servers.server3]
+    url = "http://172.18.0.5:80"
+    weight = 2
+
+[frontends]
+  [frontends.frontend1]
+  backend = "whoamiF"
+  [frontends.frontend1.routes.test1]
+  rule = "Path: /atacar"
+  
+  

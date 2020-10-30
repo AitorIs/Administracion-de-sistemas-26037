@@ -1,0 +1,33 @@
+
+defaultEntryPoints = ["http", "https"]
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":88"
+    [entryPoints.http.auth]
+      headerField = "X-WebAuth-User"
+      [entryPoints.http.auth.basic]
+        removeHeader = true
+        usersFile = ".htpasswd"
+
+  [entryPoints.https]
+  address = ":443"
+    [entryPoints.https.tls]
+      [[entryPoints.https.tls.certificates]]
+      CertFile = "localhost.crt"
+      KeyFile = "localhost.key"
+    [entryPoints.https.auth]
+      headerField = "X-WebAuth-User"
+      [entryPoints.https.auth.basic]
+        removeHeader = true
+        usersFile = ".htpasswd"
+        
+[file]
+  directory = "Configuration"
+  watch = true        
+      
+      
+      
+  
+  
+  

@@ -1,0 +1,64 @@
+# SERV='localhost' docker-compose -f traefik.yml up -d --scale whoami=2
+# ver https://lsi.vc.ehu.eus/pablogn/docencia/ISO/Act9%20Docker/
+# ver http://lsi.vc.ehu.eus/pablogn/docencia/AS/Act3%20Traefik/
+version: '3.3'
+services:
+  traefik:
+    image: traefik:v1.7-alpine
+    container_name: "traefik"
+    command: --api --docker --docker.domain=${SERV} --logLevel=DEBUG
+    ports:
+      - "88:88"
+      - "443:443"
+    labels:
+      - "traefik.docker.network=frontend"
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:${SERV}; PathPrefixStrip:/traefik"
+      - "traefik.port=8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /home/aitor/Actividades/Actividad3/Traefik/traefik_config.toml:/traefik.toml
+      - /home/aitor/Actividades/Actividad3/Traefik/Configuration:/Configuration
+      - /home/aitor/Actividades/Actividad3/Traefik/localhost.key:/localhost.key
+      - /home/aitor/Actividades/Actividad3/Traefik/localhost.crt:/localhost.crt
+      - /home/aitor/Actividades/Actividad3/Traefik/.htpasswd:/.htpasswd
+    networks:
+      - "traefik"
+
+  whoami:
+    image: containous/whoami
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=whoami"
+      - "traefik.frontend.rule=PathPrefixStrip: /whoami"
+      - "traefik.http.routers.whoami.rule=Host(${SERV})"
+      - "traefik.http.routers.whoami.entrypoints=web"    
+    networks:
+      - "traefik"
+
+  portainer: # https://www.smarthomebeginner.com/traefik-2-docker-tutorial/#Portainer_with_Traefik_2_and_OAuth
+    image: portainer/portainer
+    container_name: portainer
+    restart: unless-stopped
+    command: -H unix:///var/run/docker.sock
+    networks:
+      - traefik
+      - default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.protocol=http"
+      - "traefik.docker.network=frontend"
+      - "traefik.frontend.rule=Host:portainer.${SERV}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  portainer_data:
+
+networks:
+  traefik:
+    external:
+      name: traefik
