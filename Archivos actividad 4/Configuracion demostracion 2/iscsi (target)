@@ -1,0 +1,7 @@
+<target iqn.2020-10.as-practica4.com:lun1>
+        backing-store /dev/sde
+        initiator-address 192.168.0.18
+        initiator-address 192.168.0.23
+        initiator-name iqn.1993-08.org.debian:01:52974e6f791a
+        incominguser username password
+</target>
