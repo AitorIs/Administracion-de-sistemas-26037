@@ -1,0 +1,22 @@
+ version: "3.3"
+ 
+ services:
+   nfs_server:
+     ports:
+       - "2049:2049"
+     container_name: nfs_server
+     image: itsthenetwork/nfs-server-alpine
+     privileged: true
+     networks:
+       red_de_narcotraefiko:
+         ipv4_address: 10.0.2.31
+     environment:
+       - SHARED_DIRECTORY=/data
+     volumes:
+       - /home/aitor/actividad9/volumenes/apache:/data
+     
+ networks:
+   red_de_narcotraefiko:
+     external: true
+     
+    #docker network create --driver overlay --attachable red_de_narcotraefiko

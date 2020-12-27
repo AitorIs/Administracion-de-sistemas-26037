@@ -1,0 +1,46 @@
+ version: "3.3"
+ 
+ services:
+   traefik:
+     image: traefik:v1.7-alpine
+     command: --api --docker --docker.swarmmode --logLevel=DEBUG --docker.watch            
+     ports:
+       - "80:80"
+       - "8080:8080"
+     networks:
+       - "red_de_narcotraefiko" 
+     volumes:
+       - /var/run/docker.sock:/var/run/docker.sock:ro
+       - /dev/null:/traefik.toml 
+     deploy:
+       mode: replicated
+       replicas: 1
+       placement:
+         constraints:
+           - node.role==manager
+       labels:
+         - "traefik.docker.network=red_de_narcotraefiko"
+         - "traefik.enable=true"
+         - "traefik.frontend.rule=Host:localhost; PathPrefixStrip:/traefik"
+         - "traefik.port=8080"
+         - "traefik.protocol=http"
+         - "traefik.docker.lbswarm=true"
+     
+   apache:
+     image: httpd
+     networks:
+       - "red_de_narcotraefiko"
+     deploy:
+       mode: replicated
+       replicas: 2
+       placement:
+         constraints:
+           - node.role==worker        
+       labels:
+         - "traefik.enable=true"
+         - "traefik.port=80"
+         - "traefik.docker.network=red_de_narcotraefiko"       
+         - "traefik.frontend.rule=Host:apache.localhost"    
+              
+ networks:
+   red_de_narcotraefiko:
