@@ -1,0 +1,107 @@
+ version: "3.3"
+ 
+ services:
+   traefik:
+     image: traefik:v1.7-alpine
+     command: --api --docker --docker.swarmmode --logLevel=DEBUG --docker.watch 
+     ports:
+       - 80:80
+       - 8080:8080
+       - 443:443
+     networks:
+       - "red_de_narcotraefiko" 
+     volumes:
+       - /var/run/docker.sock:/var/run/docker.sock:ro
+       - /dev/null:/traefik.toml
+     deploy:
+       mode: replicated
+       replicas: 1
+       placement:
+         constraints:
+           - node.role==manager
+       labels:
+         - "traefik.docker.network=red_de_narcotraefiko"
+         - "traefik.enable=true"
+         - "traefik.frontend.rule=Host:localhost; PathPrefixStrip:/traefik"
+         - "traefik.port=8080"
+         - "traefik.protocol=http"
+         - "traefik.docker.lbswarm=true"
+     
+   apache:
+     image: aitoris/hasta-los-cojones:php-apache-mysqli-ostia-ya
+     networks:
+       - "red_de_narcotraefiko"
+     volumes:
+       - type: volume
+         source: nfs_volumen
+         target: /var/www/html 
+         volume:
+           nocopy: true
+       - type: volume
+         source: nfs_volumen_php_ini
+         target: /usr/local/etc/php/
+         volume:
+           nocopy: true
+     deploy:
+       mode: replicated
+       replicas: 2
+       placement:
+         constraints:
+           - node.role==worker        
+       labels:
+         - "traefik.enable=true"
+         - "traefik.port=80"
+         - "traefik.docker.network=red_de_narcotraefiko"       
+         - "traefik.frontend.rule=Host:apache.localhost"  
+   
+   mysql:
+     image: mariadb
+     ports:
+       - 3306:3306
+     environment:
+       - MYSQL_DATABASE=database_prueba
+       - MYSQL_ROOT_PASSWORD=password
+       - MYSQL_USER=user
+       - MYSQL_PASSWORD=password
+     networks:
+       - "red_de_narcotraefiko"
+     volumes:
+       - type: volume
+         source: nfs_volumen_base
+         target: /var/lib/mysql
+         volume:
+           nocopy: true
+     deploy:
+       mode: replicated
+       replicas: 1
+       placement:
+         constraints:
+           - node.role==manager 
+                     
+ networks:
+   red_de_narcotraefiko:
+     external: true
+          
+ volumes: 
+   nfs_volumen:
+     driver: local
+     driver_opts:
+       type: "nfs4"
+       o: "addr=192.168.0.24,nolock,soft,rw"
+       device: ":/apache"
+       
+   nfs_volumen_base:
+     driver: local
+     driver_opts:
+       type: "nfs4"
+       o: "addr=192.168.0.24,nolock,soft,rw"
+       device: ":/baseDatos"
+       
+   nfs_volumen_php_ini:
+     driver: local
+     driver_opts:
+       type: "nfs4"
+       o: "addr=192.168.0.24,nolock,soft,rw"
+       device: ":/php"
+       
+  

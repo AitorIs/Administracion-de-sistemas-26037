@@ -1,0 +1,37 @@
+ version: "3.3"
+ 
+ services:
+   nfs_server:
+     ports:
+       - 2049:2049
+     container_name: nfs_server
+     image: itsthenetwork/nfs-server-alpine
+     privileged: true
+     networks:
+       red_de_narcotraefiko:
+         ipv4_address: 10.0.2.31
+     environment:
+       - SHARED_DIRECTORY=/data
+     volumes:
+       - /home/aitor/actividad9/volumenes:/data
+       
+   #registro:
+   #  image: registry:2
+   #  ports:
+   #    - 5000:5000
+   #  container_name: registry
+   #  environment:
+   #    - REGISTRY_HTTP_TLS_CERTIFICATE=/certs/registry.crt
+   #    - REGISTRY_HTTP_TLS_KEY=/certs/registry.key
+   #  volumes:
+   #    - /home/aitor/actividad9/volumenes/registro:/var/lib/registry
+   #    - /home/aitor/actividad9/volumenes/certificados:/certs
+                              
+ networks:
+   red_de_narcotraefiko:
+     external: true
+     
+     
+     #docker network create --driver overlay --attachable red_de_narcotraefiko
+   
+
